@@ -8,13 +8,14 @@
 #include <unistd.h>
 
 #include <X11/Xlib.h>
+#include <tinyalsa/asoundlib.h>
 
-static char *batcap(void);
-static char *loadavg(void);
-static char *curtime(void);
+char *alsavol(void);
+char *batcap(void);
+char *loadavg(void);
+char *curtime(void);
 
 #include "config.h"
-#define LENGTH(X) (sizeof X / sizeof X[0])
 
 void
 die(char *errstr, ...)
@@ -85,10 +86,44 @@ batcap(void)
 	curc = readnum((char*)sysbat, "charge_now");
 	maxc = readnum((char*)sysbat, "charge_full_design");
 
-	res = 100 * (curc / maxc);
+	res = 100.0 * (curc / maxc);
 	snprintf(batstr, sizeof(batstr), "%.2f%%", res);
 
 	return batstr;
+}
+
+char*
+alsavol(void)
+{
+	char *status;
+	static char alsastr[BUFSIZ];
+	struct mixer *mx;
+	struct mixer_ctl *ctl;
+
+	if (!(mx = mixer_open(sndcrd)))
+		die("couldn't open mixer for card %d\n", sndcrd);
+
+	if (!(ctl = mixer_get_ctl_by_name(mx, ctlname))) {
+		mixer_close(mx);
+		die("couldn't find mixer ctl '%s'\n", ctlname);
+	}
+
+	switch (mixer_ctl_get_type(ctl)) {
+	case MIXER_CTL_TYPE_INT:
+		snprintf(alsastr, 5, "%d%%", mixer_ctl_get_value(ctl, 0));
+		break;
+	case MIXER_CTL_TYPE_BOOL:
+		status = mixer_ctl_get_value(ctl, 0) ? "On" : "Off";
+		strncpy(alsastr, status, strlen(status) + 1);
+		break;
+	default:
+		mixer_close(mx);
+		die("unsupported ctl type '%s'\n",
+			mixer_ctl_get_type_string(ctl));
+	};
+
+	mixer_close(mx);
+	return alsastr;
 }
 
 char*
@@ -141,7 +176,7 @@ main(void)
 	root = RootWindow(dpy, screen);
 
 	for (;;) {
-		len = LENGTH(sfuncs);
+		len = sizeof(sfuncs) / sizeof(sfuncs[0]);
 		char *sres[len];
 
 		for (int i = 0; i < len; i++)
