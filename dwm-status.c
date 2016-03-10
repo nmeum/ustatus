@@ -9,6 +9,7 @@
 
 #include <X11/Xlib.h>
 
+static char *batcap(void);
 static char *curload(void);
 static char *curtime(void);
 
@@ -48,6 +49,43 @@ strjo(char *strs[], size_t nfn, char *sep)
 	}
 
 	return res;
+}
+
+double
+readint(char *bfp, char *fn)
+{
+	FILE *file;
+	size_t rclen;
+	char buf[16], *rc = NULL,
+	     fp[strlen(bfp) + strlen(fn) + 2];
+
+	snprintf(fp, sizeof(fp), "%s/%s", bfp, fn);
+	if (!(file = fopen(fp, "r")))
+		die("couldn't open '%s': %s\n", fp, strerror(errno));
+
+	if (!(rc = fgets(buf, sizeof(buf), file)))
+		die("'%s' seems to be empty\n", fp);
+
+	rclen = strlen(buf);
+	if (rc[rclen - 1] == '\n')
+		rc[rclen - 1] = '\0';
+
+	return atof(rc);
+}
+
+char*
+batcap(void)
+{
+	static char buf[BUFSIZ];
+	double res, curc, maxc;
+
+	curc = readint((char*)sysbat, "charge_now");
+	maxc = readint((char*)sysbat, "charge_full_design");
+
+	res = 100 * (curc / maxc);
+	snprintf(buf, sizeof(buf), "%.2f%%", res);
+
+	return buf;
 }
 
 char*

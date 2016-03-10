@@ -7,9 +7,13 @@ static const char *statsep = " | ";
 /* Format to use in the curtime function for the current time. */
 static const char *timefmt = "%d %b %Y %H:%M:%S";
 
+/* Path to power supply battery file in /sys. */
+static const char *sysbat = "/sys/class/power_supply/BAT0";
+
 /* Array of functions to use in the status bar text.
  * NOTE: You shouldn't add any of these more than once. */
 static char* (* const sfuncs[])(void) = {
-	curtime,
+	batcap,
 	curload,
+	curtime,
 };

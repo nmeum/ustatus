@@ -6,7 +6,7 @@ HEADERS = config.h
 X11INC ?= /usr/include/X11
 X11LIB ?= /usr/lib/X11
 
-CFLAGS ?= -g -Os -pedantic -Wall
+CFLAGS ?= -g -O0 -pedantic -Wall
 CFLAGS += -D_BSD_SOURCE -std=c99 -I$(X11INC)
 
 CC      ?= gcc
