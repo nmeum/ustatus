@@ -29,7 +29,7 @@ die(char *errstr, ...)
 }
 
 char*
-strjo(char *strs[], size_t nfn, char *sep)
+strjoi(char *strs[], size_t nfn, char *sep)
 {
 	char *res;
 	size_t len;
@@ -182,7 +182,7 @@ main(void)
 		for (int i = 0; i < len; i++)
 			sres[i] = (*sfuncs[i])();
 
-		text = strjo(sres, len, (char*)statsep);
+		text = strjoi(sres, len, (char*)statsep);
 		XStoreName(dpy, root, text);
 
 		free(text);
