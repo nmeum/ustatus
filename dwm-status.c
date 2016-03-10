@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -15,7 +16,7 @@ static char *curtime(void);
 #define LENGTH(X) (sizeof X / sizeof X[0])
 
 void
-die(const char *errstr, ...)
+die(char *errstr, ...)
 {
 	va_list ap;
 
@@ -23,6 +24,32 @@ die(const char *errstr, ...)
 	vfprintf(stderr, errstr, ap);
 	va_end(ap);
 	exit(1);
+}
+
+char*
+strjo(char *strs[], size_t nfn, char sep)
+{
+	char *res;
+	size_t len;
+
+	assert(nfn >= 1);
+
+	len = 0;
+	for (int i = 0; i < nfn; i++)
+		len += strlen(strs[i]) + 1;
+
+	if (!(res = malloc(len)))
+		die("malloc failed: %s\n", strerror(errno));
+
+	strcpy(res, strs[0]);
+	for (int n = 1; n < nfn; n++) {
+		size_t csize = strlen(res);
+		res[csize] = sep;
+		res[csize + 1] = '\0';
+		strcat(res, strs[n]);
+	}
+
+	return res;
 }
 
 char*
@@ -64,7 +91,9 @@ main(void)
 {
 	Display *dpy;
 	Window root;
+	size_t len;
 	int screen;
+	char *text;
 
 	if ((dpy = XOpenDisplay(NULL)) == NULL)
 		die("Couldn't open display '%s'\n", XDisplayName(NULL));
@@ -73,10 +102,14 @@ main(void)
 	root = RootWindow(dpy, screen);
 
 	for (;;) {
-		for (int i = 0; i < LENGTH(sfuncs); i++) {
-			char *text = (*sfuncs[i])();
-			XStoreName(dpy, root, text);
-		}
+		len = LENGTH(sfuncs);
+		char *sres[len];
+
+		for (int i = 0; i < len; i++)
+			sres[i] = (*sfuncs[i])();
+
+		text = strjo(sres, len, statsep);
+		XStoreName(dpy, root, text);
 
 		XFlush(dpy);
 		sleep(delay);
