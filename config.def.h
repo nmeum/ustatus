@@ -2,7 +2,7 @@
 static const int delay = 5;
 
 /* Seperator to use between different status function outputs. */
-static const char statsep = '|';
+static const char *statsep = " | ";
 
 /* Format to use in the curtime function for the current time. */
 static const char *timefmt = "%d %b %Y %H:%M:%S";

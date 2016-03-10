@@ -27,25 +27,23 @@ die(char *errstr, ...)
 }
 
 char*
-strjo(char *strs[], size_t nfn, char sep)
+strjo(char *strs[], size_t nfn, char *sep)
 {
 	char *res;
 	size_t len;
 
 	assert(nfn >= 1);
 
-	len = 0;
+	len = (nfn - 1) * strlen(sep) + 1;
 	for (int i = 0; i < nfn; i++)
-		len += strlen(strs[i]) + 1;
+		len += strlen(strs[i]);
 
 	if (!(res = malloc(len)))
 		die("malloc failed: %s\n", strerror(errno));
 
 	strcpy(res, strs[0]);
 	for (int n = 1; n < nfn; n++) {
-		size_t csize = strlen(res);
-		res[csize] = sep;
-		res[csize + 1] = '\0';
+		strcat(res, sep);
 		strcat(res, strs[n]);
 	}
 
@@ -108,7 +106,7 @@ main(void)
 		for (int i = 0; i < len; i++)
 			sres[i] = (*sfuncs[i])();
 
-		text = strjo(sres, len, statsep);
+		text = strjo(sres, len, (char*)statsep);
 		XStoreName(dpy, root, text);
 
 		XFlush(dpy);
