@@ -1,3 +1,4 @@
+# See LICENSE for license details.
 BIN_NAME = dwm-status
 
 OBJECTS = $(BIN_NAME).o

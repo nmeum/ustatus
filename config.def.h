@@ -1,3 +1,5 @@
+/* See LICENSE for license details. */
+
 /* Delay (in seconds) used between updates of the status text. */
 static const int delay = 5;
 

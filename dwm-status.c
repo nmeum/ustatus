@@ -1,3 +1,5 @@
+/* See LICENSE for license details. */
+
 #include <assert.h>
 #include <errno.h>
 #include <stdarg.h>
