@@ -14,6 +14,6 @@ static const char *sysbat = "/sys/class/power_supply/BAT0";
  * NOTE: You shouldn't add any of these more than once. */
 static char* (* const sfuncs[])(void) = {
 	batcap,
-	curload,
+	loadavg,
 	curtime,
 };

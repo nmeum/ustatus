@@ -10,7 +10,7 @@
 #include <X11/Xlib.h>
 
 static char *batcap(void);
-static char *curload(void);
+static char *loadavg(void);
 static char *curtime(void);
 
 #include "config.h"
@@ -52,7 +52,7 @@ strjo(char *strs[], size_t nfn, char *sep)
 }
 
 double
-readint(char *bfp, char *fn)
+readnum(char *bfp, char *fn)
 {
 	FILE *file;
 	size_t rclen;
@@ -63,44 +63,47 @@ readint(char *bfp, char *fn)
 	if (!(file = fopen(fp, "r")))
 		die("couldn't open '%s': %s\n", fp, strerror(errno));
 
-	if (!(rc = fgets(buf, sizeof(buf), file)))
+	if (!(rc = fgets(buf, sizeof(buf), file))) {
+		fclose(file);
 		die("'%s' seems to be empty\n", fp);
+	}
 
 	rclen = strlen(buf);
 	if (rc[rclen - 1] == '\n')
 		rc[rclen - 1] = '\0';
 
+	fclose(file);
 	return atof(rc);
 }
 
 char*
 batcap(void)
 {
-	static char buf[BUFSIZ];
+	static char batstr[BUFSIZ];
 	double res, curc, maxc;
 
-	curc = readint((char*)sysbat, "charge_now");
-	maxc = readint((char*)sysbat, "charge_full_design");
+	curc = readnum((char*)sysbat, "charge_now");
+	maxc = readnum((char*)sysbat, "charge_full_design");
 
 	res = 100 * (curc / maxc);
-	snprintf(buf, sizeof(buf), "%.2f%%", res);
+	snprintf(batstr, sizeof(batstr), "%.2f%%", res);
 
-	return buf;
+	return batstr;
 }
 
 char*
-curload(void)
+loadavg(void)
 {
 	double avgs[3];
-	static char buf[BUFSIZ];
+	static char loadstr[BUFSIZ];
 
 	if (getloadavg(avgs, 3) == 0)
 		die("getloadavg failed: %s\n", strerror(errno));
 
-	snprintf(buf, sizeof(buf), "%.2f %.2f %.2f",
+	snprintf(loadstr, sizeof(loadstr), "%.2f %.2f %.2f",
 		avgs[0], avgs[1], avgs[2]);
 
-	return buf;
+	return loadstr;
 }
 
 char*
@@ -108,7 +111,7 @@ curtime(void)
 {
 	time_t tim;
 	struct tm *timtm;
-	static char buf[BUFSIZ];
+	static char tmstr[BUFSIZ];
 
 	if ((tim = time(NULL)) == (time_t)-1)
 		die("time failed: %s\n", strerror(errno));
@@ -116,10 +119,10 @@ curtime(void)
 	if (!(timtm = localtime(&tim)))
 		die("Couldn't determine localtime\n");
 
-	if (!strftime(buf, sizeof(buf), timefmt, timtm))
+	if (!strftime(tmstr, sizeof(tmstr), timefmt, timtm))
 		die("strftime returned zero\n");
 
-	return buf;
+	return tmstr;
 }
 
 int
@@ -147,7 +150,9 @@ main(void)
 		text = strjo(sres, len, (char*)statsep);
 		XStoreName(dpy, root, text);
 
+		free(text);
 		XFlush(dpy);
+
 		sleep(delay);
 	}
 
