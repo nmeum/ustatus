@@ -7,7 +7,7 @@ X11INC ?= /usr/include/X11
 X11LIB ?= /usr/lib/X11
 
 CFLAGS ?= -g -Os -pedantic -Wall
-CFLAGS += -std=c99 -I$(X11INC)
+CFLAGS += -D_BSD_SOURCE -std=c99 -I$(X11INC)
 
 CC      ?= gcc
 LDFLAGS += -L$(X11LIB) -lX11

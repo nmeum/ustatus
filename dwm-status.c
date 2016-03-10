@@ -8,7 +8,8 @@
 
 #include <X11/Xlib.h>
 
-static char* curtime(void);
+static char *curload(void);
+static char *curtime(void);
 
 #include "config.h"
 #define LENGTH(X) (sizeof X / sizeof X[0])
@@ -25,6 +26,21 @@ die(const char *errstr, ...)
 }
 
 char*
+curload(void)
+{
+	double avgs[3];
+	static char buf[BUFSIZ];
+
+	if (getloadavg(avgs, 3) == 0)
+		die("getloadavg failed: %s\n", strerror(errno));
+
+	snprintf(buf, sizeof(buf), "%.2f %.2f %.2f",
+		avgs[0], avgs[1], avgs[2]);
+
+	return buf;
+}
+
+char*
 curtime(void)
 {
 	time_t tim;
@@ -34,8 +50,7 @@ curtime(void)
 	if ((tim = time(NULL)) == (time_t)-1)
 		die("time failed: %s\n", strerror(errno));
 
-	timtm = localtime(&tim);
-	if (timtm == NULL)
+	if (!(timtm = localtime(&tim)))
 		die("Couldn't determine localtime\n");
 
 	if (!strftime(buf, sizeof(buf), timefmt, timtm))

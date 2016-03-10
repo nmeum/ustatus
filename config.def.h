@@ -1,10 +1,11 @@
-/* Delay used between changes of the status text. */
+/* Delay (in seconds) used between updates of the status text. */
 static const int delay = 5;
 
 /* Format to use in the curtime function for the current time. */
 static const char *timefmt = "%d %b %Y %H:%M:%S";
 
-/* Array of functions to use in the status bar text. */
+/* Array of functions to use in the status bar text.
+ * NOTE: You shouldn't add any of these more than once. */
 static char* (* const sfuncs[])(void) = {
-	timefmt,
+	curtime,
 };
