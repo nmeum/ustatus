@@ -82,7 +82,7 @@ readnum(char *bfp, char *fn)
 char*
 batcap(void)
 {
-	static char batstr[BUFSIZ];
+	static char batstr[8];
 	double res, curc, maxc;
 
 	curc = readnum((char*)sysbat, "charge_now");
@@ -98,7 +98,7 @@ char*
 alsavol(void)
 {
 	char *status;
-	static char alsastr[BUFSIZ];
+	static char alsastr[8];
 	struct mixer *mx;
 	struct mixer_ctl *ctl;
 
