@@ -45,10 +45,10 @@ strjoi(char *strs[], size_t nfn, char *sep)
 	if (!(res = malloc(len)))
 		die("malloc failed: %s\n", strerror(errno));
 
-	strcpy(res, strs[0]);
+	strncpy(res, strs[0], len);
 	for (int n = 1; n < nfn; n++) {
-		strcat(res, sep);
-		strcat(res, strs[n]);
+		strncat(res, sep, len);
+		strncat(res, strs[n], len);
 	}
 
 	return res;
