@@ -140,14 +140,12 @@ alsavol(void)
 	strncat(fname, swtch, sizeof(fname));
 
 	actlstr(alsastr, fname, mx);
-	if (!strcmp(alsastr, "Off"))
-		goto end;
+	if (strcmp(alsastr, "Off")) {
+		strncpy(fname, ctlname, sizeof(fname));
+		strncat(fname, volme, sizeof(fname));
+		actlstr(alsastr, fname, mx);
+	}
 
-	strncpy(fname, ctlname, sizeof(fname));
-	strncat(fname, volme, sizeof(fname));
-	actlstr(alsastr, fname, mx);
-
-end:
 	mixer_close(mx);
 	return alsastr;
 }
