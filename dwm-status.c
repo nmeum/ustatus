@@ -84,6 +84,31 @@ readnum(char *bfp, char *fn)
 	return atof(rc);
 }
 
+void
+actlstr(char *buf, char *ch, struct mixer *mx) {
+	char *status;
+	struct mixer_ctl *ctl;
+
+	if (!(ctl = mixer_get_ctl_by_name(mx, ch))) {
+		mixer_close(mx);
+		die("couldn't find mixer ctl '%s'\n", ch);
+	}
+
+	switch (mixer_ctl_get_type(ctl)) {
+	case MIXER_CTL_TYPE_INT:
+		snprintf(buf, 5, "%d%%", mixer_ctl_get_value(ctl, 0));
+		break;
+	case MIXER_CTL_TYPE_BOOL:
+		status = mixer_ctl_get_value(ctl, 0) ? "On" : "Off";
+		strncpy(buf, status, strlen(status) + 1);
+		break;
+	default:
+		mixer_close(mx);
+		die("unsupported ctl type '%s'\n",
+			mixer_ctl_get_type_string(ctl));
+	};
+}
+
 char*
 batcap(void)
 {
@@ -102,33 +127,27 @@ batcap(void)
 char*
 alsavol(void)
 {
-	char *status;
-	static char alsastr[8];
 	struct mixer *mx;
-	struct mixer_ctl *ctl;
+	static char alsastr[8];
+	char fname[18 + strlen(ctlname)],
+		*swtch = " Playback Switch",
+		*volme = " Playback Volume";
 
 	if (!(mx = mixer_open(sndcrd)))
 		die("couldn't open mixer for card %d\n", sndcrd);
 
-	if (!(ctl = mixer_get_ctl_by_name(mx, ctlname))) {
-		mixer_close(mx);
-		die("couldn't find mixer ctl '%s'\n", ctlname);
-	}
+	strncpy(fname, ctlname, strlen(ctlname));
+	strncat(fname, swtch, sizeof(fname));
 
-	switch (mixer_ctl_get_type(ctl)) {
-	case MIXER_CTL_TYPE_INT:
-		snprintf(alsastr, 5, "%d%%", mixer_ctl_get_value(ctl, 0));
-		break;
-	case MIXER_CTL_TYPE_BOOL:
-		status = mixer_ctl_get_value(ctl, 0) ? "On" : "Off";
-		strncpy(alsastr, status, strlen(status) + 1);
-		break;
-	default:
-		mixer_close(mx);
-		die("unsupported ctl type '%s'\n",
-			mixer_ctl_get_type_string(ctl));
-	};
+	actlstr(alsastr, fname, mx);
+	if (!strcmp(alsastr, "Off"))
+		goto end;
 
+	strncpy(fname, ctlname, sizeof(fname));
+	strncat(fname, volme, sizeof(fname));
+	actlstr(alsastr, fname, mx);
+
+end:
 	mixer_close(mx);
 	return alsastr;
 }
