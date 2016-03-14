@@ -193,7 +193,7 @@ main(void)
 	Window root;
 	size_t len;
 
-	if ((dpy = XOpenDisplay(NULL)) == NULL)
+	if (!(dpy = XOpenDisplay(NULL)))
 		die("Couldn't open display '%s'\n", XDisplayName(NULL));
 
 	screen = DefaultScreen(dpy);
