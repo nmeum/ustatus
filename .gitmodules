@@ -1,3 +1,0 @@
-[submodule "tinyalsa"]
-	path = tinyalsa
-	url = git://github.com/tinyalsa/tinyalsa.git
