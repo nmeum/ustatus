@@ -24,4 +24,4 @@ config.h: config.def.h
 	cp $< $@
 
 clean:
-	rm -f $(BIN_NAME) $(OBJECTS)
+	$(RM) $(BIN_NAME) $(OBJECTS)
