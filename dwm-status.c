@@ -43,7 +43,7 @@ strjoi(char *strs[], char *sep)
 	len -= slen;
 	if (len <= 1) return "";
 
-	if (!(res = malloc(len)))
+	if (!(res = malloc(len * sizeof(char*))))
 		die("malloc failed: %s\n", strerror(errno));
 
 	strncpy(res, strs[0], len);
