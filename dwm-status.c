@@ -136,7 +136,7 @@ alsavol(void)
 	if (!(mx = mixer_open(sndcrd)))
 		die("couldn't open mixer for card %d\n", sndcrd);
 
-	strncpy(fname, ctlname, strlen(ctlname));
+	strncpy(fname, ctlname, strlen(ctlname) + 1);
 	strncat(fname, swtch, sizeof(fname));
 
 	actlstr(alsastr, fname, mx);
@@ -208,7 +208,7 @@ main(void)
 			if (val) sres[x++] = val;
 		}
 
-		sres[++x] = NULL;
+		sres[x] = NULL;
 		text = strjoi(sres, (char*)statsep);
 
 		XStoreName(dpy, root, text);
