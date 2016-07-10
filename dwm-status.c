@@ -187,7 +187,7 @@ curtime(void)
 int
 main(void)
 {
-	int screen, i, x;
+	int i, x;
 	char *text, *val;
 	Display *dpy;
 	Window root;
@@ -195,9 +195,7 @@ main(void)
 
 	if (!(dpy = XOpenDisplay(NULL)))
 		die("Couldn't open display '%s'\n", XDisplayName(NULL));
-
-	screen = DefaultScreen(dpy);
-	root = RootWindow(dpy, screen);
+	root = DefaultRootWindow(dpy);
 
 	for (;;) {
 		len = sizeof(sfuncs) / sizeof(sfuncs[0]);
@@ -212,7 +210,7 @@ main(void)
 		text = strjoi(sres, (char*)statsep);
 
 		XStoreName(dpy, root, text);
-		XFlush(dpy);
+		XSync(dpy, False);
 
 		free(text);
 		sleep(delay);
