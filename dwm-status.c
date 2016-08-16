@@ -96,7 +96,7 @@ actlstr(char *buf, char *ch, struct mixer *mx) {
 
 	switch (mixer_ctl_get_type(ctl)) {
 	case MIXER_CTL_TYPE_INT:
-		snprintf(buf, 5, "%d%%", mixer_ctl_get_value(ctl, 0));
+		snprintf(buf, 5, "%d%%", mixer_ctl_get_percent(ctl, 0));
 		break;
 	case MIXER_CTL_TYPE_BOOL:
 		status = mixer_ctl_get_value(ctl, 0) ? "On" : "Off";
