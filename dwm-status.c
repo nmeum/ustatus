@@ -1,23 +1,31 @@
 /* See LICENSE for license details. */
 
-#include <assert.h>
 #include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <limits.h>
 #include <unistd.h>
 
+#include <sys/types.h>
 #include <X11/Xlib.h>
 #include <tinyalsa/asoundlib.h>
 
-char *alsavol(void);
-char *batcap(void);
-char *loadavg(void);
-char *curtime(void);
+size_t alsavol(char*, size_t);
+size_t batcap(char*, size_t);
+size_t loadavg(char*, size_t);
+size_t curtime(char*, size_t);
+size_t seperator(char*, size_t);
 
 #include "config.h"
+
+enum {
+	STATUSSZ = 128,
+};
+
+static char ststr[STATUSSZ];
 
 void
 die(char *errstr, ...)
@@ -30,48 +38,18 @@ die(char *errstr, ...)
 	exit(1);
 }
 
-char*
-strjoi(char *strs[], char *sep)
-{
-	char *res, *val;
-	size_t len, slen = strlen(sep);
-
-	len = 1;
-	for (int i = 0; strs[i]; i++)
-		len += strlen(strs[i]) + slen;
-
-	len -= slen;
-	if (len <= 1) return "";
-
-	if (!(res = malloc(len * sizeof(char*))))
-		die("malloc failed: %s\n", strerror(errno));
-
-	strncpy(res, strs[0], len);
-	for (int i = 1; ; i++) {
-		if ((val = strs[i])) {
-			strncat(res, sep, len);
-			strncat(res, val, len);
-		} else {
-			break;
-		}
-	}
-
-	return res;
-}
-
 double
 readnum(char *bfp, char *fn)
 {
 	FILE *file;
 	size_t rclen;
-	char buf[16], *rc = NULL,
-	     fp[strlen(bfp) + strlen(fn) + 2];
+	char buf[16], *rc = NULL, fp[PATH_MAX];
 
-	snprintf(fp, sizeof(fp), "%s/%s", bfp, fn);
+	snprintf(fp, PATH_MAX, "%s/%s", bfp, fn);
 	if (!(file = fopen(fp, "r")))
 		die("couldn't open '%s': %s\n", fp, strerror(errno));
 
-	if (!(rc = fgets(buf, sizeof(buf), file))) {
+	if (!(rc = fgets(buf, 16, file))) {
 		fclose(file);
 		die("'%s' seems to be empty\n", fp);
 	}
@@ -84,8 +62,9 @@ readnum(char *bfp, char *fn)
 	return atof(rc);
 }
 
-void
-actlstr(char *buf, char *ch, struct mixer *mx) {
+size_t
+actlstr(char *buf, size_t n, char *ch, struct mixer *mx) {
+	size_t ret;
 	char *status;
 	struct mixer_ctl *ctl;
 
@@ -96,81 +75,75 @@ actlstr(char *buf, char *ch, struct mixer *mx) {
 
 	switch (mixer_ctl_get_type(ctl)) {
 	case MIXER_CTL_TYPE_INT:
-		snprintf(buf, 5, "%d%%", mixer_ctl_get_percent(ctl, 0));
+		if ((ret = snprintf(buf, n, "%d%%",
+				mixer_ctl_get_percent(ctl, 0))) > n)
+			ret = n;
 		break;
 	case MIXER_CTL_TYPE_BOOL:
 		status = mixer_ctl_get_value(ctl, 0) ? "On" : "Off";
-		strncpy(buf, status, strlen(status) + 1);
+		ret = stpncpy(buf, status, n) - buf;
 		break;
 	default:
 		mixer_close(mx);
 		die("unsupported ctl type '%s'\n",
 			mixer_ctl_get_type_string(ctl));
 	};
+
+	return ret;
 }
 
-char*
-batcap(void)
+size_t
+batcap(char *dest, size_t n)
 {
-	static char batstr[8];
+	size_t ret;
 	double res, curc, maxc;
 
 	curc = readnum((char*)sysbat, "charge_now");
 	maxc = readnum((char*)sysbat, "charge_full_design");
 
 	res = 100.0 * (curc / maxc);
-	snprintf(batstr, sizeof(batstr), "%.2f%%", res);
-
-	return batstr;
+	if ((ret = snprintf(dest, n, "%.2f%%", res)) > n)
+		ret = n;
+	return ret;
 }
 
-char*
-alsavol(void)
+size_t
+alsavol(char *dest, size_t n)
 {
+	size_t ret;
 	struct mixer *mx;
-	static char alsastr[8];
-	char fname[18 + strlen(ctlname)],
-		*swtch = " Playback Switch",
-		*volme = " Playback Volume";
 
 	if (!(mx = mixer_open(sndcrd)))
 		die("couldn't open mixer for card %d\n", sndcrd);
 
-	strncpy(fname, ctlname, strlen(ctlname) + 1);
-	strncat(fname, swtch, sizeof(fname));
-
-	actlstr(alsastr, fname, mx);
-	if (strcmp(alsastr, "Off")) {
-		strncpy(fname, ctlname, sizeof(fname));
-		strncat(fname, volme, sizeof(fname));
-		actlstr(alsastr, fname, mx);
-	}
+	ret = actlstr(dest, n, (char*)swtchname, mx);
+	if (strcmp(dest, "Off"))
+		ret = actlstr(dest, n, (char*)volumname, mx);
 
 	mixer_close(mx);
-	return alsastr;
+	return ret;
 }
 
-char*
-loadavg(void)
+size_t
+loadavg(char* dest, size_t n)
 {
+	size_t ret;
 	double avgs[3];
-	static char loadstr[BUFSIZ];
 
-	if (getloadavg(avgs, 3) == 0)
+	if (!getloadavg(avgs, 3))
 		die("getloadavg failed: %s\n", strerror(errno));
 
-	snprintf(loadstr, sizeof(loadstr), "%.2f %.2f %.2f",
-		avgs[0], avgs[1], avgs[2]);
-
-	return loadstr;
+	if ((ret = snprintf(dest, n, "%.2f %.2f %.2f",
+			avgs[0], avgs[1], avgs[2])) > n)
+		ret = n;
+	return ret;
 }
 
-char*
-curtime(void)
+size_t
+curtime(char *dest, size_t n)
 {
 	time_t tim;
 	struct tm *timtm;
-	static char tmstr[BUFSIZ];
 
 	if ((tim = time(NULL)) == (time_t)-1)
 		die("time failed: %s\n", strerror(errno));
@@ -178,41 +151,34 @@ curtime(void)
 	if (!(timtm = localtime(&tim)))
 		die("Couldn't determine localtime\n");
 
-	if (!strftime(tmstr, sizeof(tmstr), timefmt, timtm))
-		die("strftime returned zero\n");
+	return strftime(dest, n, timefmt, timtm);
+}
 
-	return tmstr;
+size_t
+seperator(char *dest, size_t n)
+{
+	return stpncpy(dest, statsep, n) - dest;
 }
 
 int
 main(void)
 {
-	int i, x;
-	char *text, *val;
 	Display *dpy;
 	Window root;
-	size_t len;
+	size_t i, x, ret, len;
 
 	if (!(dpy = XOpenDisplay(NULL)))
 		die("Couldn't open display '%s'\n", XDisplayName(NULL));
 	root = DefaultRootWindow(dpy);
 
+	len = sizeof(sfuncs) / sizeof(sfuncs[0]);
 	for (;;) {
-		len = sizeof(sfuncs) / sizeof(sfuncs[0]);
-		char *sres[len + 1];
+		memset(ststr, '\0', STATUSSZ);
+		for (i = 0, x = 0; i < len && x < STATUSSZ; i++, x += ret)
+			ret = (*sfuncs[i])(&(ststr[x]), STATUSSZ - x);
 
-		for (i = 0, x = 0; i < len; i++) {
-			val = (*sfuncs[i])();
-			if (val) sres[x++] = val;
-		}
-
-		sres[x] = NULL;
-		text = strjoi(sres, (char*)statsep);
-
-		XStoreName(dpy, root, text);
+		XStoreName(dpy, root, ststr);
 		XSync(dpy, False);
-
-		free(text);
 		sleep(delay);
 	}
 

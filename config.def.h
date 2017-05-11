@@ -16,13 +16,16 @@ static const char *sysbat = "/sys/class/power_supply/BAT0";
 static const unsigned int sndcrd = 0;
 
 /* Name of the control channel to use for alsa output. */
-static const char* ctlname = "Master";
+static const char* swtchname = "Master Playback Switch";
+static const char* volumname = "Master Playback Volume";
 
-/* Array of functions to use in the status bar text.
- * NOTE: You shouldn't add any of these more than once. */
-static char* (* const sfuncs[])(void) = {
+/* Array of functions to use in the status bar text. */
+static size_t (* const sfuncs[])(char*, size_t) = {
 	batcap,
+	seperator,
 	alsavol,
+	seperator,
 	loadavg,
+	seperator,
 	curtime,
 };
