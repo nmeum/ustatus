@@ -98,8 +98,8 @@ batcap(char *dest, size_t n)
 	size_t ret;
 	double res, curc, maxc;
 
-	curc = readnum((char*)sysbat, "charge_now");
-	maxc = readnum((char*)sysbat, "charge_full_design");
+	curc = readnum((char*)sysbat, (char*)syscur);
+	maxc = readnum((char*)sysbat, (char*)sysfull);
 
 	res = 100.0 * (curc / maxc);
 	if ((ret = snprintf(dest, n, "%.2f%%", res)) > n)
