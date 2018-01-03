@@ -28,6 +28,41 @@ offord(struct audio_mixer_enum *e)
 	return -1;
 }
 
+static int
+outmix(int fd, int ndev, mixer_devinfo_t *out)
+{
+	int cs;
+	mixer_devinfo_t dinfo;
+
+	cs = -1;
+	for (dinfo.index = 0; dinfo.index < ndev; dinfo.index++) {
+		if (ioctl(fd, AUDIO_MIXER_DEVINFO, &dinfo) == -1)
+			die("ioctl AUDIO_MIXER_DEVINFO failed");
+
+		if (dinfo.type == AUDIO_MIXER_CLASS &&
+				!strcmp(dinfo.label.name, AudioCoutputs)) {
+			cs = dinfo.index;
+			break;
+		}
+	}
+
+	if (cs == -1)
+		return -1;
+
+	for (dinfo.index = 0; dinfo.index < ndev; dinfo.index++) {
+		if (ioctl(fd, AUDIO_MIXER_DEVINFO, &dinfo) == -1)
+			die("ioctl AUDIO_MIXER_DEVINFO failed");
+
+		if (dinfo.mixer_class == cs &&
+				!strcmp(dinfo.label.name, mixer)) {
+			memcpy(out, &dinfo, sizeof(dinfo));
+			return 0;
+		}
+	}
+
+	return -1;
+}
+
 static void
 findctl(int fd, int *val, int *enu, int *ord)
 {
@@ -41,16 +76,8 @@ findctl(int fd, int *val, int *enu, int *ord)
 			break;
 	}
 
-	for (dinfo.index = 0; dinfo.index < ndev; dinfo.index++) {
-		if (ioctl(fd, AUDIO_MIXER_DEVINFO, &dinfo) == -1)
-			die("ioctl AUDIO_MIXER_DEVINFO failed");
-
-		if (!strcmp(dinfo.label.name, mixer))
-			break;
-	}
-
-	if (dinfo.index >= ndev) {
-		fprintf(stderr, "mixer with specified label not found in '%s'\n", MIXDEV);
+	if (outmix(fd, ndev, &dinfo) == -1) {
+		fprintf(stderr, "no output mixer named '%s' exists\n", mixer);
 		exit(EXIT_FAILURE);
 	}
 
