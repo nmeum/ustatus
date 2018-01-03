@@ -13,6 +13,13 @@
 #include "config.h"
 #include "util.h"
 
+/* post-ironic macro magic for fun and profit. */
+#define EACHDEV(FD, DEVINFO, MAX) \
+	for (DEVINFO.index = 0; DEVINFO.index < MAX; DEVINFO.index++)   \
+		if (ioctl(FD, AUDIO_MIXER_DEVINFO, &DEVINFO) == -1)     \
+			die("ioctl AUDIO_MIXER_DEVINFO failed");        \
+		else                                                    \
+
 static int
 offord(struct audio_mixer_enum *e)
 {
@@ -33,10 +40,7 @@ outmix(int fd, int ndev, mixer_devinfo_t *out)
 	mixer_devinfo_t dinfo;
 
 	cs = -1;
-	for (dinfo.index = 0; dinfo.index < ndev; dinfo.index++) {
-		if (ioctl(fd, AUDIO_MIXER_DEVINFO, &dinfo) == -1)
-			die("ioctl AUDIO_MIXER_DEVINFO failed");
-
+	EACHDEV(fd, dinfo, ndev) {
 		if (dinfo.type == AUDIO_MIXER_CLASS &&
 				!strcmp(dinfo.label.name, AudioCoutputs)) {
 			cs = dinfo.index;
@@ -47,10 +51,7 @@ outmix(int fd, int ndev, mixer_devinfo_t *out)
 	if (cs == -1)
 		return -1;
 
-	for (dinfo.index = 0; dinfo.index < ndev; dinfo.index++) {
-		if (ioctl(fd, AUDIO_MIXER_DEVINFO, &dinfo) == -1)
-			die("ioctl AUDIO_MIXER_DEVINFO failed");
-
+	EACHDEV(fd, dinfo, ndev) {
 		if (dinfo.mixer_class == cs &&
 				!strcmp(dinfo.label.name, mixer)) {
 			memcpy(out, &dinfo, sizeof(dinfo));
