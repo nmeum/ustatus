@@ -56,5 +56,8 @@ static const char *volumname = "Master Playback Volume";
  * OpenBSD settings
  */
 
+/* Path to the mixer device. */
+static const char *mixdev = "/dev/mixer";
+
 /* Name of the audio mixer. */
 static const char *mixer = "master";

@@ -13,8 +13,6 @@
 #include "config.h"
 #include "util.h"
 
-#define MIXDEV "/dev/mixer"
-
 static int
 offord(struct audio_mixer_enum *e)
 {
@@ -109,7 +107,7 @@ curvol(char *dest, size_t n)
 	int fd, enu, val, off;
 	mixer_ctrl_t mctl;
 
-	if ((fd = open(MIXDEV, O_RDONLY)) == -1)
+	if ((fd = open(mixdev, O_RDONLY)) == -1)
 		die("open failed");
 
 	off = 0;
