@@ -7,7 +7,7 @@ include compat/$(shell uname -s)/config.mk
 OBJECTS = $(SRCFILES:%.c=%.o)
 HEADERS = config.h util.h
 
-CFLAGS ?= -Os -pedantic -Wall -Wno-unused-variable
+CFLAGS ?= -Os -pedantic -Wall -Wextra -Wno-unused-variable
 CFLAGS += -D_BSD_SOURCE -std=c99 -I$(X11INC) -I.
 
 LDFLAGS += -L$(X11LIB) -lX11
