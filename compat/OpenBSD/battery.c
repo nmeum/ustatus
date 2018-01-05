@@ -8,9 +8,8 @@
 #include <sys/ioctl.h>
 #include <machine/apmvar.h>
 
+#include "config.h"
 #include "util.h"
-
-#define APMDEV "/dev/apm"
 
 size_t
 batcap(char *dest, size_t n)
@@ -18,7 +17,7 @@ batcap(char *dest, size_t n)
 	struct apm_power_info info;
 	int fd;
 
-	if ((fd = open(APMDEV, O_RDONLY)) == -1)
+	if ((fd = open(apmdev, O_RDONLY)) == -1)
 		die("open failed");
 
 	if (ioctl(fd, APM_IOC_GETPOWER, &info) == -1)

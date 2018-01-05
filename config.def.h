@@ -56,6 +56,9 @@ static const char *volumname = "Master Playback Volume";
  * OpenBSD settings
  */
 
+/* Path to the APM device. */
+static const char *apmdev = "/dev/apm";
+
 /* Path to the mixer device. */
 static const char *mixdev = "/dev/mixer";
 
