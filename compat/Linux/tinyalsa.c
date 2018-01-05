@@ -10,7 +10,6 @@
 
 static size_t
 actlstr(char *buf, size_t n, char *ch, struct mixer *mx) {
-	size_t ret;
 	char *status;
 	struct mixer_ctl *ctl;
 
@@ -21,20 +20,19 @@ actlstr(char *buf, size_t n, char *ch, struct mixer *mx) {
 
 	switch (mixer_ctl_get_type(ctl)) {
 	case MIXER_CTL_TYPE_INT:
-		ret = xsnprintf(buf, n, "%d%%",
+		return xsnprintf(buf, n, "%d%%",
 			mixer_ctl_get_percent(ctl, 0));
-		break;
 	case MIXER_CTL_TYPE_BOOL:
 		status = mixer_ctl_get_value(ctl, 0) ? "On" : "Off";
-		ret = stpncpy(buf, status, n) - buf;
-		break;
+		return stpncpy(buf, status, n) - buf;
 	default:
 		fprintf(stderr, "unsupported ctl type '%s'\n",
 			mixer_ctl_get_type_string(ctl));
 		exit(EXIT_FAILURE);
 	};
 
-	return ret;
+	/* Never reached. */
+	return 0;
 }
 
 size_t
