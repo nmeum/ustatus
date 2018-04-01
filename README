@@ -1,1 +1,11 @@
-Yet another stupid dwm status tool.
+Yet another dwm <https://dwm.suckless.org> status tool.
+
+Features:
+	* Battery capacity
+	* Mixer volume
+	* System load
+	* Time
+
+Supported operating systems:
+	* Linux
+	* OpenBSD
