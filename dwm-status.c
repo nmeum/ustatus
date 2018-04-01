@@ -41,13 +41,13 @@ curtime(char *dest, size_t n)
 	if (!(timtm = localtime(&tim)))
 		die("localtime failed");
 
-	return strftime(dest, n, timefmt, timtm);
+	return strftime(dest, n, TIMEFMT, timtm);
 }
 
 size_t
 seperator(char *dest, size_t n)
 {
-	return stpncpy(dest, statsep, n) - dest;
+	return stpncpy(dest, STATSEP, n) - dest;
 }
 
 int
@@ -76,7 +76,7 @@ main(void)
 
 		XStoreName(dpy, root, ststr);
 		XSync(dpy, False);
-		sleep(delay);
+		sleep(DELAY);
 	}
 
 	XCloseDisplay(dpy);

@@ -41,12 +41,12 @@ curvol(char *dest, size_t n)
 	size_t ret;
 	struct mixer *mx;
 
-	if (!(mx = mixer_open(sndcrd)))
+	if (!(mx = mixer_open(SNDCRD)))
 		die("mixer_open failed");
 
-	ret = actlstr(dest, n, (char*)swtchname, mx);
+	ret = actlstr(dest, n, SWTCHNAME, mx);
 	if (strcmp(dest, "Off"))
-		ret = actlstr(dest, n, (char*)volumname, mx);
+		ret = actlstr(dest, n, VOLUMNAME, mx);
 
 	mixer_close(mx);
 	return ret;

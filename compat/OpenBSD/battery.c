@@ -17,7 +17,7 @@ batcap(char *dest, size_t n)
 	struct apm_power_info info;
 	int fd;
 
-	if ((fd = open(apmdev, O_RDONLY)) == -1)
+	if ((fd = open(APMDEV, O_RDONLY)) == -1)
 		die("open failed");
 
 	if (ioctl(fd, APM_IOC_GETPOWER, &info) == -1)

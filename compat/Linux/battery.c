@@ -38,8 +38,8 @@ batcap(char *dest, size_t n)
 {
 	double res, curc, maxc;
 
-	curc = readnum((char*)sysbat, (char*)syscur);
-	maxc = readnum((char*)sysbat, (char*)sysfull);
+	curc = readnum(SYSBAT, SYSCUR);
+	maxc = readnum(SYSBAT, SYSFULL);
 
 	res = 100.0 * (curc / maxc);
 	return xsnprintf(dest, n, "%.2f%%", res);

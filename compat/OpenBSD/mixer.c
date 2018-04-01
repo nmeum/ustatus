@@ -53,7 +53,7 @@ outmix(int fd, int ndev, mixer_devinfo_t *out)
 
 	EACHDEV(fd, dinfo, ndev) {
 		if (dinfo.mixer_class == cs &&
-				!strcmp(dinfo.label.name, mixer)) {
+				!strcmp(dinfo.label.name, MIXER)) {
 			memcpy(out, &dinfo, sizeof(dinfo));
 			return 0;
 		}
@@ -76,7 +76,7 @@ findctl(int fd, int *val, int *enu, int *ord)
 	}
 
 	if (outmix(fd, ndev, &dinfo) == -1) {
-		fprintf(stderr, "no output mixer named '%s' exists\n", mixer);
+		fprintf(stderr, "no output mixer named '%s' exists\n", MIXER);
 		exit(EXIT_FAILURE);
 	}
 
@@ -97,7 +97,7 @@ findctl(int fd, int *val, int *enu, int *ord)
 	}
 
 	if (*val == -1) {
-		fprintf(stderr, "mixer '%s' has no AUDIO_MIXER_VALUE device\n", mixer);
+		fprintf(stderr, "mixer '%s' has no AUDIO_MIXER_VALUE device\n", MIXER);
 		exit(EXIT_FAILURE);
 	}
 }
@@ -108,7 +108,7 @@ curvol(char *dest, size_t n)
 	int fd, enu, val, off;
 	mixer_ctrl_t mctl;
 
-	if ((fd = open(mixdev, O_RDONLY)) == -1)
+	if ((fd = open(MIXDEV, O_RDONLY)) == -1)
 		die("open failed");
 
 	off = 0;
