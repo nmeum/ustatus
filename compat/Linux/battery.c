@@ -9,7 +9,7 @@
 #include "config.h"
 #include "util.h"
 
-double
+static double
 readnum(char *bfp, char *fn)
 {
 	FILE *file;
