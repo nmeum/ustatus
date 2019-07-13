@@ -54,12 +54,12 @@ readnum(char *bfp, char *fn)
 	int ret;
 	FILE *file;
 	size_t rclen;
-	char buf[16], fp[PATH_MAX], *rc;
+	char buf[16], fp[PATH_MAX + 1], *rc;
 
 	rc = NULL;
-	if ((ret = snprintf(fp, PATH_MAX, "%s/%s", bfp, fn)) < 0)
+	if ((ret = snprintf(fp, sizeof(fp), "%s/%s", bfp, fn)) < 0)
 		errx(EXIT_FAILURE, "snprintf failed");
-	else if ((size_t)ret >= PATH_MAX)
+	else if ((size_t)ret >= sizeof(fp))
 		errx(EXIT_FAILURE, "buffer 'fp' is too short");
 
 	if (!(file = fopen(fp, "r")))
