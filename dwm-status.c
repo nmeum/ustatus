@@ -28,14 +28,36 @@ enum {
 
 static char ststr[STATUSSZ];
 
+int
+xsnprintf(char *restrict s, size_t n, const char *restrict fmt, ...)
+{
+	int ret;
+	va_list ap;
+
+	va_start(ap, fmt);
+	ret = vsnprintf(s, n, fmt, ap);
+	va_end(ap);
+
+	if (ret < 0) {
+		err(EXIT_FAILURE, "snprintf failed");
+	} else if ((size_t)ret >= n) {
+		warnx("snprintf: insufficient buffer size");
+		ret = n;
+	}
+
+	return ret;
+}
+
 double
 readnum(char *bfp, char *fn)
 {
 	FILE *file;
 	size_t rclen;
-	char buf[16], *rc = NULL, fp[PATH_MAX];
+	char buf[16], fp[PATH_MAX], *rc;
 
+	rc = NULL;
 	snprintf(fp, PATH_MAX, "%s/%s", bfp, fn);
+
 	if (!(file = fopen(fp, "r")))
 		err(EXIT_FAILURE, "couldn't open '%s'", fp);
 
@@ -65,10 +87,8 @@ actlstr(char *buf, size_t n, char *ch, struct mixer *mx) {
 
 	switch (mixer_ctl_get_type(ctl)) {
 	case MIXER_CTL_TYPE_INT:
-		if ((ret = snprintf(buf, n, "%d%%",
-				mixer_ctl_get_percent(ctl, 0))) > n)
-			ret = n;
-		break;
+		return xsnprintf(buf, n, "%d%%",
+			mixer_ctl_get_percent(ctl, 0));
 	case MIXER_CTL_TYPE_BOOL:
 		status = mixer_ctl_get_value(ctl, 0) ? "On" : "Off";
 		ret = stpncpy(buf, status, n) - buf;
@@ -85,16 +105,13 @@ actlstr(char *buf, size_t n, char *ch, struct mixer *mx) {
 size_t
 batcap(char *dest, size_t n)
 {
-	size_t ret;
 	double res, curc, maxc;
 
 	curc = readnum((char*)sysbat, (char*)syscur);
 	maxc = readnum((char*)sysbat, (char*)sysfull);
 
 	res = 100.0 * (curc / maxc);
-	if ((ret = snprintf(dest, n, "%.2f%%", res)) > n)
-		ret = n;
-	return ret;
+	return xsnprintf(dest, n, "%.2f%%", res);
 }
 
 size_t
@@ -117,16 +134,13 @@ alsavol(char *dest, size_t n)
 size_t
 loadavg(char* dest, size_t n)
 {
-	size_t ret;
 	double avgs[3];
 
 	if (!getloadavg(avgs, 3))
 		err(EXIT_FAILURE, "getloadavg failed");
 
-	if ((ret = snprintf(dest, n, "%.2f %.2f %.2f",
-			avgs[0], avgs[1], avgs[2])) > n)
-		ret = n;
-	return ret;
+	return xsnprintf(dest, n, "%.2f %.2f %.2f",
+		avgs[0], avgs[1], avgs[2]);
 }
 
 size_t
