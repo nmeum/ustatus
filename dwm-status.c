@@ -1,5 +1,6 @@
 /* See LICENSE for license details. */
 
+#include <assert.h>
 #include <err.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -154,17 +155,21 @@ main(void)
 {
 	Display *dpy;
 	Window root;
-	size_t i, x, ret, len;
+	size_t i, x, fns, max;
 
 	if (!(dpy = XOpenDisplay(NULL)))
 		errx(EXIT_FAILURE, "couldn't open display '%s'", XDisplayName(NULL));
 	root = DefaultRootWindow(dpy);
 
-	len = sizeof(sfuncs) / sizeof(sfuncs[0]);
+	max = STATUSSZ - 1;
+	fns = sizeof(sfuncs) / sizeof(sfuncs[0]);
+
 	for (;;) {
-		memset(ststr, '\0', STATUSSZ);
-		for (i = 0, x = 0; i < len; i++, x += ret)
-			ret = (*sfuncs[i])(&(ststr[x]), STATUSSZ - x);
+		for (i = 0, x = 0; i < fns && x < max; i++)
+			x += (*sfuncs[i])(&(ststr[x]), max - x);
+
+		assert(x < STATUSSZ);
+		ststr[x] = '\0';
 
 		XStoreName(dpy, root, ststr);
 		XSync(dpy, False);
