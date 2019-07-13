@@ -14,11 +14,11 @@
 #include <X11/Xlib.h>
 #include <tinyalsa/asoundlib.h>
 
-size_t alsavol(char*, size_t);
-size_t batcap(char*, size_t);
-size_t loadavg(char*, size_t);
-size_t curtime(char*, size_t);
-size_t seperator(char*, size_t);
+static size_t alsavol(char*, size_t);
+static size_t batcap(char*, size_t);
+static size_t loadavg(char*, size_t);
+static size_t curtime(char*, size_t);
+static size_t seperator(char*, size_t);
 
 #include "config.h"
 
@@ -28,7 +28,7 @@ enum {
 
 static char ststr[STATUSSZ];
 
-int
+static int
 xsnprintf(char *restrict s, size_t n, const char *restrict fmt, ...)
 {
 	int ret;
@@ -48,7 +48,7 @@ xsnprintf(char *restrict s, size_t n, const char *restrict fmt, ...)
 	return ret;
 }
 
-double
+static double
 readnum(char *bfp, char *fn)
 {
 	int ret;
@@ -78,7 +78,7 @@ readnum(char *bfp, char *fn)
 	return atof(rc);
 }
 
-size_t
+static size_t
 actlstr(char *buf, size_t n, char *ch, struct mixer *mx) {
 	size_t ret;
 	char *status;
@@ -106,7 +106,7 @@ actlstr(char *buf, size_t n, char *ch, struct mixer *mx) {
 	return ret;
 }
 
-size_t
+static size_t
 batcap(char *dest, size_t n)
 {
 	double res, curc, maxc;
@@ -118,7 +118,7 @@ batcap(char *dest, size_t n)
 	return xsnprintf(dest, n, "%.2f%%", res);
 }
 
-size_t
+static size_t
 alsavol(char *dest, size_t n)
 {
 	size_t ret;
@@ -135,7 +135,7 @@ alsavol(char *dest, size_t n)
 	return ret;
 }
 
-size_t
+static size_t
 loadavg(char* dest, size_t n)
 {
 	double avgs[3];
@@ -147,7 +147,7 @@ loadavg(char* dest, size_t n)
 		avgs[0], avgs[1], avgs[2]);
 }
 
-size_t
+static size_t
 curtime(char *dest, size_t n)
 {
 	time_t tim;
@@ -162,7 +162,7 @@ curtime(char *dest, size_t n)
 	return strftime(dest, n, timefmt, timtm);
 }
 
-size_t
+static size_t
 seperator(char *dest, size_t n)
 {
 	return stpncpy(dest, statsep, n) - dest;
