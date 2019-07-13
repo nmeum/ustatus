@@ -18,7 +18,7 @@ static size_t alsavol(char*, size_t);
 static size_t batcap(char*, size_t);
 static size_t loadavg(char*, size_t);
 static size_t curtime(char*, size_t);
-static size_t seperator(char*, size_t);
+static size_t separator(char*, size_t);
 
 #include "config.h"
 
@@ -163,7 +163,7 @@ curtime(char *dest, size_t n)
 }
 
 static size_t
-seperator(char *dest, size_t n)
+separator(char *dest, size_t n)
 {
 	return stpncpy(dest, statsep, n) - dest;
 }

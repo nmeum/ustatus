@@ -28,10 +28,10 @@ static const char* volumname = "Master Playback Volume";
 /* Array of functions to use in the status bar text. */
 static size_t (* const sfuncs[])(char*, size_t) = {
 	batcap,
-	seperator,
+	separator,
 	alsavol,
-	seperator,
+	separator,
 	loadavg,
-	seperator,
+	separator,
 	curtime,
 };
