@@ -51,12 +51,16 @@ xsnprintf(char *restrict s, size_t n, const char *restrict fmt, ...)
 double
 readnum(char *bfp, char *fn)
 {
+	int ret;
 	FILE *file;
 	size_t rclen;
 	char buf[16], fp[PATH_MAX], *rc;
 
 	rc = NULL;
-	snprintf(fp, PATH_MAX, "%s/%s", bfp, fn);
+	if ((ret = snprintf(fp, PATH_MAX, "%s/%s", bfp, fn)) < 0)
+		errx(EXIT_FAILURE, "snprintf failed");
+	else if ((size_t)ret >= PATH_MAX)
+		errx(EXIT_FAILURE, "buffer 'fp' is too short");
 
 	if (!(file = fopen(fp, "r")))
 		err(EXIT_FAILURE, "couldn't open '%s'", fp);
