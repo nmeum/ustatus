@@ -7,14 +7,17 @@ HEADERS = config.h
 X11INC ?= /usr/include/X11
 X11LIB ?= /usr/lib/X11
 
-CFLAGS ?= -Os -fomit-frame-pointer -pedantic -Wall
-CFLAGS += -D_BSD_SOURCE -std=c99 -I$(X11INC)
+CFLAGS ?= -O0 -g -Werror
+CFLAGS += -D_BSD_SOURCE -std=c99
+CFLAGS += -Wpedantic -Wall -Wextra \
+	      -Wmissing-prototypes -Wpointer-arith \
+	      -Wstrict-prototypes -Wshadow
 
-CC      ?= gcc
-LDFLAGS += -L$(X11LIB) -lX11 -ltinyalsa
+CPPFLAGS += -I$(X11INC)
+LDFLAGS  += -L$(X11LIB) -lX11 -ltinyalsa
 
 %.o: %.c $(HEADERS)
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CC) -c -o $@ $< $(CPPFLAGS) $(CFLAGS)
 
 all: $(BIN_NAME)
 $(BIN_NAME): $(OBJECTS)
