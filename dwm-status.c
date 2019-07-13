@@ -1,6 +1,6 @@
 /* See LICENSE for license details. */
 
-#include <errno.h>
+#include <err.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,17 +27,6 @@ enum {
 
 static char ststr[STATUSSZ];
 
-void
-die(char *errstr, ...)
-{
-	va_list ap;
-
-	va_start(ap, errstr);
-	vfprintf(stderr, errstr, ap);
-	va_end(ap);
-	exit(EXIT_FAILURE);
-}
-
 double
 readnum(char *bfp, char *fn)
 {
@@ -47,11 +36,11 @@ readnum(char *bfp, char *fn)
 
 	snprintf(fp, PATH_MAX, "%s/%s", bfp, fn);
 	if (!(file = fopen(fp, "r")))
-		die("couldn't open '%s': %s\n", fp, strerror(errno));
+		err(EXIT_FAILURE, "couldn't open '%s'", fp);
 
 	if (!(rc = fgets(buf, 16, file))) {
 		fclose(file);
-		die("'%s' seems to be empty\n", fp);
+		errx(EXIT_FAILURE, "'%s' seems to be empty", fp);
 	}
 
 	rclen = strlen(buf);
@@ -70,7 +59,7 @@ actlstr(char *buf, size_t n, char *ch, struct mixer *mx) {
 
 	if (!(ctl = mixer_get_ctl_by_name(mx, ch))) {
 		mixer_close(mx);
-		die("couldn't find mixer ctl '%s'\n", ch);
+		errx(EXIT_FAILURE, "couldn't find mixer ctl '%s'\n", ch);
 	}
 
 	switch (mixer_ctl_get_type(ctl)) {
@@ -85,7 +74,7 @@ actlstr(char *buf, size_t n, char *ch, struct mixer *mx) {
 		break;
 	default:
 		mixer_close(mx);
-		die("unsupported ctl type '%s'\n",
+		errx(EXIT_FAILURE, "unsupported ctl type '%s'\n",
 			mixer_ctl_get_type_string(ctl));
 	};
 
@@ -114,7 +103,7 @@ alsavol(char *dest, size_t n)
 	struct mixer *mx;
 
 	if (!(mx = mixer_open(sndcrd)))
-		die("couldn't open mixer for card %d\n", sndcrd);
+		errx(EXIT_FAILURE, "couldn't open mixer for card %d\n", sndcrd);
 
 	ret = actlstr(dest, n, (char*)swtchname, mx);
 	if (strcmp(dest, "Off"))
@@ -131,7 +120,7 @@ loadavg(char* dest, size_t n)
 	double avgs[3];
 
 	if (!getloadavg(avgs, 3))
-		die("getloadavg failed: %s\n", strerror(errno));
+		err(EXIT_FAILURE, "getloadavg failed");
 
 	if ((ret = snprintf(dest, n, "%.2f %.2f %.2f",
 			avgs[0], avgs[1], avgs[2])) > n)
@@ -146,10 +135,10 @@ curtime(char *dest, size_t n)
 	struct tm *timtm;
 
 	if ((tim = time(NULL)) == (time_t)-1)
-		die("time failed: %s\n", strerror(errno));
+		err(EXIT_FAILURE, "time failed");
 
 	if (!(timtm = localtime(&tim)))
-		die("Couldn't determine localtime\n");
+		err(EXIT_FAILURE, "localtime failed");
 
 	return strftime(dest, n, timefmt, timtm);
 }
@@ -168,7 +157,7 @@ main(void)
 	size_t i, x, ret, len;
 
 	if (!(dpy = XOpenDisplay(NULL)))
-		die("Couldn't open display '%s'\n", XDisplayName(NULL));
+		errx(EXIT_FAILURE, "couldn't open display '%s'", XDisplayName(NULL));
 	root = DefaultRootWindow(dpy);
 
 	len = sizeof(sfuncs) / sizeof(sfuncs[0]);
