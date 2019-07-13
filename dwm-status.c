@@ -35,7 +35,7 @@ die(char *errstr, ...)
 	va_start(ap, errstr);
 	vfprintf(stderr, errstr, ap);
 	va_end(ap);
-	exit(1);
+	exit(EXIT_FAILURE);
 }
 
 double
@@ -183,5 +183,5 @@ main(void)
 	}
 
 	XCloseDisplay(dpy);
-	return 0;
+	return EXIT_SUCCESS;
 }
