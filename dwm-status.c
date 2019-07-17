@@ -183,8 +183,10 @@ main(void)
 	fns = sizeof(sfuncs) / sizeof(sfuncs[0]);
 
 	for (;;) {
-		for (i = 0, x = 0; i < fns && x < max; i++)
+		for (i = 0, x = 0; i < fns && x < max; i++) {
+			assert(max >= x);
 			x += (*sfuncs[i])(&(ststr[x]), max - x);
+		}
 
 		assert(x < STATUSSZ);
 		ststr[x] = '\0';
