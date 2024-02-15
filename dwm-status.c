@@ -11,7 +11,6 @@
 #include <unistd.h>
 
 #include <sys/types.h>
-#include <X11/Xlib.h>
 #include <tinyalsa/asoundlib.h>
 
 static size_t alsavol(char*, size_t);
@@ -168,13 +167,7 @@ separator(char *dest, size_t n)
 int
 main(void)
 {
-	Display *dpy;
-	Window root;
 	size_t i, x, fns, max;
-
-	if (!(dpy = XOpenDisplay(NULL)))
-		errx(EXIT_FAILURE, "couldn't open display '%s'", XDisplayName(NULL));
-	root = DefaultRootWindow(dpy);
 
 	max = STATUSSZ - 1;
 	fns = sizeof(sfuncs) / sizeof(sfuncs[0]);
@@ -188,11 +181,10 @@ main(void)
 		assert(x < STATUSSZ);
 		ststr[x] = '\0';
 
-		XStoreName(dpy, root, ststr);
-		XSync(dpy, False);
+		printf("%s\n", ststr);
+		fflush(stdout);
 		sleep(delay);
 	}
 
-	XCloseDisplay(dpy);
 	return EXIT_SUCCESS;
 }
