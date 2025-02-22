@@ -12,12 +12,6 @@ static const char *timefmt = "%d %b %Y %H:%M:%S";
 /* Path to power supply battery directory in /sys. */
 static const char *sysbat = "/sys/class/power_supply/BAT0";
 
-/* Path to control file for current charge. */
-static const char *syscur = "charge_now";
-
-/* Path to control file for full charge. */
-static const char *sysfull = "charge_full_design";
-
 /* Sound card to use for alsa output. */
 static const unsigned int sndcrd = 0;
 

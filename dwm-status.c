@@ -109,13 +109,10 @@ actlstr(char *buf, size_t n, char *ch, struct mixer *mx) {
 static size_t
 batcap(char *dest, size_t n)
 {
-	double res, curc, maxc;
+	int cap;
 
-	curc = readnum((char*)sysbat, (char*)syscur);
-	maxc = readnum((char*)sysbat, (char*)sysfull);
-
-	res = 100.0 * (curc / maxc);
-	return xsnprintf(dest, n, "%.2f%%", res);
+	cap = readnum((char*)sysbat, "capacity");
+	return xsnprintf(dest, n, "%d%%", cap);
 }
 
 static size_t
