@@ -1,6 +1,6 @@
 .POSIX:
 
-BIN_NAME = dwm-status
+BIN_NAME = ustatus
 OBJECTS  = $(BIN_NAME).o
 HEADERS  = config.h
 
