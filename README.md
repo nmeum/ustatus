@@ -2,7 +2,7 @@
 
 A very minimal status tool for [dwm]-like status bars (e.g. [creek], [dam], [levee]).
 
-## Building
+### Building
 
 Requires [tinyalsa] and a C99 compiler toolchain, if these are installed run:
 
