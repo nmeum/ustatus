@@ -2,12 +2,11 @@
 
 A very minimal status tool for [dwm]-like status bars (e.g. [creek], [dam], [levee]).
 
-## Installation
+## Building
 
 Requires [tinyalsa] and a C99 compiler toolchain, if these are installed run:
 
 	$ make
-	$ make install
 
 Configuration happens at compile-time by editing `config.h`.
 
